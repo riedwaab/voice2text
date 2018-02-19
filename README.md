@@ -1,3 +1,4 @@
+{'
 # voice2text
 Use Azure Media Indexing Service to convert Audio or Video files to text caption files.
 
@@ -8,6 +9,7 @@ The VTT file is processed to make human readable.
 ## Requirements
 You will need to deploy a azure media service with service principle authentication.
 Create an appconfig.json file with you Azure media settings inside it like this:
+
 {
     "AMSTenantDomain": "microsoft.onmicrosoft.com",
     "AMSRestAPIEndpoint": "https://myazmediaep.restv2.westeurope.media.azure.net/api/",
