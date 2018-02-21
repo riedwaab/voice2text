@@ -1,4 +1,3 @@
-{'
 # voice2text
 Use Azure Media Indexing Service to convert Audio or Video files to text caption files.
 
@@ -16,3 +15,5 @@ Create an appconfig.json file with you Azure media settings inside it like this:
     "AMSAClientId": "ed9fd949-b8df-4f49-9d38-20828f9973d1",
     "AMSClientSecret": "D6fFsNr1qaLUd925HcHF9385l9MbbhZe6mFS2znV77U="
 }
+
+Replace the above with your own Domain, API Endpoint, Client ID and Secret.
