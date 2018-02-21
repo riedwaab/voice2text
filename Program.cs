@@ -67,7 +67,11 @@ public class Program
         Console.WriteLine("Cleaning up Output Asset: " + outputAsset.Name);
         outputAsset.Delete();
 
+<<<<<<< HEAD
         Console.WriteLine("Processing VTT to text file:");
+=======
+        Console.WriteLine("Processing VTT to text file.");
+>>>>>>> d5a2f31eed85816921835af95baae462896fedcb
         ProcessVTTfile(sFilename);
 
         Console.WriteLine("Done.");
@@ -236,6 +240,7 @@ public class Program
     static void ProcessVTTfile(string sInputFile)
     {
         string sDirectory = Path.GetDirectoryName(sInputFile);
+<<<<<<< HEAD
         string sFileName = sDirectory + @"\" + Path.GetFileNameWithoutExtension(sInputFile) + @"_aud_SpReco.vtt";
         Console.WriteLine(sFileName);
 
@@ -244,6 +249,14 @@ public class Program
                             where   (s.IndexOf("-->") < 0) && 
                                     (s.Length > 0) &&
                                     (!s.StartsWith("NOTE Confidence:"))
+=======
+        string sFileName = Path.GetFileNameWithoutExtension(sInputFile);
+        Console.WriteLine(sDirectory + @"\" + sFileName + @"_aud_SpReco.vtt");
+         
+        var lines = File.ReadAllLines(sFileName + @"_aud_SpReco.vtt");
+        var cleanLines = (from s in lines
+                            where (s.IndexOf("-->") < 0) && (s.Length > 0)
+>>>>>>> d5a2f31eed85816921835af95baae462896fedcb
                             select s);
          
         //   for (var i = 1; i<10 ; i += 1)
