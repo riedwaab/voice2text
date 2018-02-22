@@ -17,3 +17,7 @@ Create an appconfig.json file with you Azure media settings inside it like this:
 }
 
 Replace the above with your own Domain, API Endpoint, Client ID and Secret.
+
+## References
+ - Azure Media Service Overview https://docs.microsoft.com/en-us/azure/media-services/media-services-overview
+  - Azure Media Indexing Service 2 https://docs.microsoft.com/en-us/azure/media-services/media-services-process-content-with-indexer2
