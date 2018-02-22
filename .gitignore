@@ -2,5 +2,4 @@ bin/
 obj/
 media/
 .vscode/
-appsettings.json
-
+./appsettings.json
