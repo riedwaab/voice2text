@@ -3,3 +3,4 @@ bin/
 obj/
 media/
 .vscode/
+process.ps1

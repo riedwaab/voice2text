@@ -3,7 +3,7 @@ Use Azure Media Indexing Service to convert Audio or Video files to text caption
 
 This console project shows how to use the Azure Media Index 2 Service in a practical way.
 The tool accepts a file via command line and converts it to several caption files.
-The VTT file is processed to make human readable.
+The VTT file is processed to a TXT file to make it human readable.
 
 ## Requirements
 You will need to deploy a azure media service with service principle authentication.

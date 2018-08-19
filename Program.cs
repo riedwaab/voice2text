@@ -24,6 +24,7 @@ public class Program
             System.Console.WriteLine("Usage: Voice2Text <filename>\n  filename = Path to file.");
             return 1;
         }
+
         // Test if the argument is a file
         string sFilename = Path.GetFullPath(args[0]); 
         if (!File.Exists(sFilename))
@@ -60,17 +61,18 @@ public class Program
 
         // Run indexing job.
         var outputAsset = RunIndexingJob(sFilename,sConfigFile);
+        
+        if (outputAsset != null)
+        {
+            Console.WriteLine("Downloading output...");
+            DownloadAssetToLocal(outputAsset, sDirectory);
+            // Cleaning up Output Asset
+            outputAsset.Delete();
+            // Convert the VTT file to text file
+            ProcessVTTfile(sFilename);
+            Console.WriteLine("Done.");
+        }
 
-        Console.WriteLine("Downloading output...");
-        DownloadAssetToLocal(outputAsset, sDirectory);
-
-        Console.WriteLine("Cleaning up Output Asset: " + outputAsset.Name);
-        outputAsset.Delete();
-
-        Console.WriteLine("Processing VTT to text file:");
-        ProcessVTTfile(sFilename);
-
-        Console.WriteLine("Done.");
         return 0;
     }
 
@@ -79,8 +81,7 @@ public class Program
         Console.WriteLine("Preparing to Upload '{0}'", inputMediaFilePath);
         // Create an asset and upload the input media file to storage.
         IAsset asset = UploadFile(inputMediaFilePath, AssetCreationOptions.None);
-        Console.WriteLine("Done Uploading.");
-
+      
         // Declare a new job.
         IJob job = _context.Jobs.Create("Voice2Text Job");
 
@@ -101,20 +102,27 @@ public class Program
 
         // Specify the input asset to be indexed.
         task.InputAssets.Add(asset);
-
+     
         // Add an output asset to contain the results of the job.
         task.OutputAssets.AddNew("Voice2Text Output", AssetCreationOptions.None);
 
         // Use the following event handler to check job progress.  
         job.StateChanged += new EventHandler<JobStateChangedEventArgs>(StateChanged);
-        
+       
         Console.WriteLine("Submitting Speach Recognition Job.");
         // Launch the job.
         job.Submit();
+        
 
         // Check job execution and wait for job to finish.
         Task progressJobTask = job.GetExecutionProgressTask(CancellationToken.None);
-        progressJobTask.Wait();
+    
+        // Show Job Progress until Job completed, Escape key cancels
+        while (!(Console.KeyAvailable && Console.ReadKey(true).Key == ConsoleKey.Escape))
+        {
+            Console.Write("\rProcessing - {0:0}% {1}", job.GetOverallProgress(), progressJobTask.Status);
+            if ( progressJobTask.IsCompleted || progressJobTask.IsCompletedSuccessfully || progressJobTask.IsCanceled || progressJobTask.IsFaulted) break;
+        }
 
         // If job state is Error, the event handling
         // method for job progress should log errors.  Here we check
@@ -127,11 +135,17 @@ public class Program
                                             error.Message));
             return null;
         }
-        Console.WriteLine("Cleaning Input Asset: " + asset.Name);
+        Console.WriteLine("\nCleaning Input Asset: " + asset.Name);
         asset.Delete();
 
         return job.OutputMediaAssets[0];
     }
+
+    void TaskProgressChangedEvent(object sender, EventArgs e)
+    {  
+        // Do something useful here.
+        Console.WriteLine(e);
+    }  
 
     static public IAsset UploadFile(string fileName, AssetCreationOptions options)
     {
@@ -205,19 +219,19 @@ public class Program
         switch (e.CurrentState)
         {
             case JobState.Finished:
-                Console.WriteLine("Job is Done.");
+                Console.WriteLine("\nJob is Done.                  ");
                 break;
             case JobState.Canceling:
-                Console.WriteLine("Job is Canceling.");
+                Console.WriteLine("\rJob is Canceling...           ");
                 break;
             case JobState.Queued:
-                Console.WriteLine("Job is Queued.");
+                Console.WriteLine("\rJob is Queued...              ");
                 break;
             case JobState.Scheduled:
-                Console.WriteLine("Job is Scheduled.");
+                Console.WriteLine("\rJob is Scheduled.             ");
                 break;
             case JobState.Processing:
-                Console.WriteLine("Processing Job. Please wait...");
+                Console.WriteLine("\rProcessing Job. Please wait...");
                 break;
             case JobState.Canceled:
                 Console.WriteLine("\nJob is CANCELED.\n");
@@ -237,15 +251,17 @@ public class Program
     {
         string sDirectory = Path.GetDirectoryName(sInputFile);
         string sFileName = sDirectory + @"\" + Path.GetFileNameWithoutExtension(sInputFile) + @"_aud_SpReco.vtt";
-        Console.WriteLine(sFileName);
-
-        var lines = File.ReadAllLines(sFileName);
-        var cleanLines = (from s in lines
-                            where   (s.IndexOf("-->") < 0) && 
-                                    (s.Length > 0) &&
-                                    (!s.StartsWith("NOTE Confidence:"))
-                            select s);
+        // Console.WriteLine(sFileName);
+        if (File.Exists(sFileName))
+        {
+            var lines = File.ReadAllLines(sFileName);
+            var cleanLines = (from s in lines
+                                where   (s.IndexOf("-->") < 0) && 
+                                         (s.Length > 0) &&
+                                        (!s.StartsWith("NOTE Confidence:"))
+                                select s);
  
         System.IO.File.WriteAllLines(sFileName + @".txt", cleanLines);
+        }
     }
 }
